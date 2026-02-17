@@ -2,7 +2,6 @@
 
 **Gmail → one Excel with all your job applications, updated automatically.**
 
-> **GitHub About:** `Gmail → one Excel for your job applications. Auto-sync, status updates (rejection/offer), free-tier friendly. For job seekers & students.`
 
 For job seekers and students: sync application emails from Gmail into a single spreadsheet. One-time OAuth, then it runs on a schedule (e.g. every 12 hours). Status updates (rejection, interview, offer) update the same row so you always see the latest. Uses Gemini for extraction; batched for up to ~80 applications/day on free tier.
 
@@ -195,17 +194,6 @@ On failure, a line with `status=failed` and `error=...` is appended. You can par
 
 Keep `sync_run.log` out of version control (it’s in `.gitignore` as `sync_run.log`).
 
-### Stress test & metrics (portfolio)
-
-See **[TESTING.md](TESTING.md)** for:
-
-- Pre-run checklist and run expectations
-- **Stress test scenarios** (first sync, idempotent run, high volume)
-- **Metrics to capture**: success rate, latency, throughput, records per run
-- Log format and how to parse `sync_run.log` for reports
-
-Run stress tests, set `SYNC_LOG_PATH=sync_run.log`, then summarize results (e.g. in a section in TESTING.md or a separate `METRICS.md`) for your portfolio or demo.
-
 ### Manual checks
 
 - Open `applications.xlsx` and confirm columns: company, role, status, stage, event_date, etc.
@@ -230,13 +218,6 @@ README.md
 
 ---
 
-## Before you publish (GitHub)
-
-- Do **not** commit: `credentials.json`, `token.json`, `.env`, `applications.db`, `applications.xlsx`, `sync_run.log`. (All are in `.gitignore`.)
-- Run `git status` and confirm no secrets or local data are staged.
-- Copy `.env.example` to `.env` locally and fill in your keys; never commit `.env`.
-
----
 
 ## License
 
