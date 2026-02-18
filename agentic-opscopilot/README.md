@@ -78,12 +78,19 @@ Run the sync once. The first time, a browser will open for you to sign in with G
 Load your env (e.g. from `.env`) then run:
 
 ```bash
-# If you use .env:
+# Linux/macOS (if you use .env):
 set -a && source .env && set +a
 python -m app.run_sync
 
 # Or use the cron script (it loads .env):
 ./scripts/run_sync_cron.sh
+
+# Windows (if you use .env):
+# First, activate venv:
+.venv\Scripts\activate
+# Then set env vars from .env manually or run:
+python -m app.run_sync
+# The script will read .env automatically if present
 ```
 
 Check that `applications.xlsx` is created/updated. Keep `credentials.json` and `token.json` in the project root (or paths you set in `.env`); both are in `.gitignore`.
@@ -106,7 +113,7 @@ Check that `applications.xlsx` is created/updated. Keep `credentials.json` and `
 
 ## Running on a schedule (every 12 hours)
 
-### Option A: Cron + script (recommended)
+### Option A: Cron + script (Linux/macOS)
 
 Make the script executable and add a cron job:
 
@@ -123,13 +130,63 @@ Add a line (adjust path to your clone):
 
 This runs at 00:00 and 12:00. The script loads `.env` from the project root and runs `python -m app.run_sync`.
 
-### Option B: Cron without script
+### Option B: Cron without script (Linux/macOS)
 
 ```cron
 0 */12 * * * cd /absolute/path/to/agentic-opscopilot && .venv/bin/python -m app.run_sync >> /tmp/opscopilot_sync.log 2>&1
 ```
 
 Set `GEMINI_API_KEY` and other vars in your shell profile or in the crontab (e.g. `GEMINI_API_KEY=...` lines before the command).
+
+### Option C: Windows Task Scheduler
+
+1. **Create a batch script** (`scripts/run_sync_cron.bat`):
+   ```batch
+   @echo off
+   cd /d "C:\path\to\agentic-opscopilot"
+   call .venv\Scripts\activate.bat
+   python -m app.run_sync >> sync_run.log 2>&1
+   ```
+   Replace `C:\path\to\agentic-opscopilot` with your actual project path.
+
+2. **Open Task Scheduler** (search "Task Scheduler" in Windows Start menu).
+
+3. **Create Basic Task**:
+   - Name: `OpsCopilot Job Sync`
+   - Trigger: **Daily** → Start time: `00:00` → Recur every: `12 hours`
+   - Action: **Start a program**
+   - Program/script: `C:\path\to\agentic-opscopilot\scripts\run_sync_cron.bat`
+   - Start in: `C:\path\to\agentic-opscopilot`
+
+4. **Advanced settings** (optional):
+   - Check **"Run whether user is logged on or not"** (if you want it to run when you're away)
+   - Check **"Run with highest privileges"** (if needed for file access)
+
+**Note:** Ensure your `.env` file is in the project root so the script can find it. The batch script will use the virtual environment's Python and run the sync.
+
+### After pulling updates from GitHub
+
+**Important:** If you pull updates that change the sync script or dependencies, you should:
+
+1. **Update dependencies** (if `requirements.txt` changed):
+   ```bash
+   # Linux/macOS:
+   source .venv/bin/activate
+   pip install -r requirements.txt
+
+   # Windows:
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+2. **Re-run the sync manually once** to verify it works:
+   ```bash
+   python -m app.run_sync
+   ```
+
+3. **Cron/Task Scheduler**: No changes needed—your existing cron job or Windows Task Scheduler entry will continue to work. The scheduled task will automatically use the updated code.
+
+**Note:** If the project structure changes significantly (e.g., script paths), you may need to update your cron entry or Task Scheduler action path.
 
 ---
 

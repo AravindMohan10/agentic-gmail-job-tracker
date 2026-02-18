@@ -124,8 +124,9 @@ def _is_candidate_email(message: Dict[str, Any]) -> bool:
     subject = (message.get("subject") or "").lower()
     sender = (message.get("from") or "").lower()
     snippet = (message.get("snippet") or "").lower()
+    body_preview = (message.get("text") or "")[:500].lower()
 
-    combined = f"{subject} {snippet}"
+    combined = f"{subject} {snippet} {body_preview}"
 
     # 1️⃣ Keyword signal
     if any(k in combined for k in APPLICATION_KEYWORDS):
@@ -283,9 +284,11 @@ def _validate_and_normalize(
     if record.confidence < 0.6:
         return None
 
-    # Must extract something meaningful
+    # Allow records without company/role ONLY if status is clear and confidence is good
+    clear_statuses = {"applied", "rejected", "interview", "offer"}
     if not record.company and not record.role:
-        return None
+        if record.status not in clear_statuses or record.confidence < 0.6:
+            return None
 
     return record
 
@@ -311,6 +314,10 @@ OFFER_PATTERNS = [
 APPLIED_PATTERNS = [
     "application received",
     "thank you for applying",
+    "application submitted",
+    "application confirmation",
+    "we received your application",
+    "your application has been received",
 ]
 
 
@@ -346,7 +353,7 @@ def _fallback_rule_based(
         stage=None,
         event_date=None,
         source_message_id=message_id,
-        confidence=0.55,
+        confidence=0.6,
         raw_reason="Fallback heuristic pattern match",
     )
 
