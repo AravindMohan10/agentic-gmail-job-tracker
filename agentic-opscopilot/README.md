@@ -200,7 +200,7 @@ Set `GEMINI_API_KEY` and other vars in your shell profile or in the crontab (e.g
 | `GMAIL_CREDENTIALS_FILE` | No | `credentials.json` | OAuth client JSON path |
 | `GMAIL_TOKEN_FILE` | No | `token.json` | Saved OAuth token path |
 | `SYNC_GMAIL_QUERY` | No | (built-in) | Gmail search query |
-| `SYNC_GMAIL_AFTER` | No | **today** | Only sync mails on/after this date (YYYY/MM/DD). Default = current day. |
+| `SYNC_GMAIL_AFTER` | No | **last 24 hours** | Only sync mails on/after this date (YYYY/MM/DD). Default = yesterday (to catch previous day evening emails). |
 | `SYNC_MAX_MESSAGES` | No | `100` | Max messages to fetch from Gmail per run (1–500) |
 | `SYNC_MAX_EXTRACTIONS_PER_RUN` | No | `80` | Max emails to process per run (assume up to 80 applications/day) |
 | `SYNC_BATCH_SIZE` | No | `5` | Emails per LLM call (80 emails = 16 calls; 1–20) |

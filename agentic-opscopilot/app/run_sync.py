@@ -26,10 +26,11 @@ from app.tools.gmail_search import gmail_search_messages
 # Config from env
 
 def _config() -> Dict[str, Any]:
-    # Default: current day only (so first sync and every sync stay within daily Gemini quota)
+    # Default: last 24 hours (to catch emails from previous day evening that might be missed)
     gmail_after = os.environ.get("SYNC_GMAIL_AFTER") or None
     if not (gmail_after and gmail_after.strip()):
-        gmail_after = datetime.now().strftime("%Y/%m/%d")
+        # Search last 24 hours instead of "today only" to avoid missing emails from previous day evening
+        gmail_after = (datetime.now() - timedelta(days=1)).strftime("%Y/%m/%d")
 
     return {
         "db_path": os.environ.get("APPLICATIONS_DB_PATH", "applications.db"),
@@ -90,7 +91,7 @@ def run_sync() -> Dict[str, Any]:
     started_at = time.perf_counter()
     init_db(db_path)
 
-    # First sync (empty DB): use last 7 days so user gets recent history. Subsequent: today only (stay under API limits).
+    # First sync (empty DB): use last 7 days so user gets recent history. Subsequent: last 24 hours (to catch previous day evening emails).
     if count_applications(db_path) == 0:
         gmail_after = (datetime.now() - timedelta(days=7)).strftime("%Y/%m/%d")
     else:
